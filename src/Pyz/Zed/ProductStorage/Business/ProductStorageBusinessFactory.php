@@ -9,6 +9,8 @@ namespace Pyz\Zed\ProductStorage\Business;
 
 use Pyz\Zed\ProductStorage\Business\Storage\ProductAbstractStorageWriter;
 use Pyz\Zed\ProductStorage\Business\Storage\ProductConcreteStorageWriter;
+use Pyz\Zed\ProductStorage\Business\Storage\WeightAttributeFilter;
+use Pyz\Zed\ProductStorage\Business\Storage\WeightAttributeFilterInterface;
 use Spryker\Zed\ProductStorage\Business\Attribute\AttributeMap;
 use Spryker\Zed\ProductStorage\Business\ProductStorageBusinessFactory as SprykerProductStorageBusinessFactory;
 use Spryker\Zed\ProductStorage\ProductStorageDependencyProvider;
@@ -42,8 +44,17 @@ class ProductStorageBusinessFactory extends SprykerProductStorageBusinessFactory
         return new ProductConcreteStorageWriter(
             $this->getProductFacade(),
             $this->getQueryContainer(),
-            $this->getConfig()->isSendingToQueue()
+            $this->getConfig()->isSendingToQueue(),
+            $this->createWeightAttributeFilter()
         );
+    }
+
+    /**
+     * @return WeightAttributeFilterInterface
+     */
+    public function createWeightAttributeFilter(): WeightAttributeFilterInterface
+    {
+        return new WeightAttributeFilter();
     }
 
     /**
