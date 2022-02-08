@@ -9,12 +9,35 @@ namespace Pyz\Zed\ProductStorage\Business\Storage;
 
 use Generated\Shared\Transfer\ProductConcreteStorageTransfer;
 use Spryker\Zed\ProductStorage\Business\Storage\ProductConcreteStorageWriter as SprykerProductConcreteStorageWriter;
+use Spryker\Zed\ProductStorage\Dependency\Facade\ProductStorageToProductInterface;
+use Spryker\Zed\ProductStorage\Persistence\ProductStorageQueryContainerInterface;
 
 /**
  * @property \Pyz\Zed\ProductStorage\Persistence\ProductStorageQueryContainerInterface $queryContainer
  */
 class ProductConcreteStorageWriter extends SprykerProductConcreteStorageWriter
 {
+    /**
+     * @var WeightAttributeFilterInterface
+     */
+    protected $weightAttributeFilter;
+
+    /**
+     * @param \Spryker\Zed\ProductStorage\Dependency\Facade\ProductStorageToProductInterface $productFacade
+     * @param \Spryker\Zed\ProductStorage\Persistence\ProductStorageQueryContainerInterface $queryContainer
+     * @param bool $isSendingToQueue
+     * @param WeightAttributeFilterInterface $weightAttributeFilter
+     */
+    public function __construct(
+        ProductStorageToProductInterface $productFacade,
+        ProductStorageQueryContainerInterface $queryContainer,
+        $isSendingToQueue,
+        $weightAttributeFilter
+    ) {
+        parent::__construct($productFacade, $queryContainer, $isSendingToQueue);
+        $this->weightAttributeFilter = $weightAttributeFilter;
+    }
+
     /**
      * @param array $productConcreteLocalizedEntity
      *
@@ -37,7 +60,7 @@ class ProductConcreteStorageWriter extends SprykerProductConcreteStorageWriter
             ->setIdProductConcrete($productConcreteLocalizedEntity[static::COL_FK_PRODUCT])
             ->setIdProductAbstract($spyProductConcreteEntityArray[static::COL_FK_PRODUCT_ABSTRACT])
             ->setDescription($this->getDescription($productConcreteLocalizedEntity))
-            ->setAttributes($attributes)
+            ->setAttributes($this->weightAttributeFilter->filter($attributes))
             ->setSuperAttributesDefinition($this->getSuperAttributeKeys($attributes));
 
         return $productStorageTransfer;
